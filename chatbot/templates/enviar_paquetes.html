@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Sky Rent - Enviar Paquetes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 220px;
+      background-color: #1f1f1f;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding-top: 20px;
+      border-right: 1px solid #333;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 12px 20px;
+      color: #00bcd4;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .sidebar a:hover {
+      background-color: #333;
+    }
+
+    .main-content {
+      margin-left: 220px;
+      padding: 20px;
+      flex-grow: 1;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    #map {
+      height: 400px;
+      width: 100%;
+      margin-bottom: 20px;
+      border: 2px solid #00bcd4;
+    }
+
+    form {
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #00bcd4;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #0097a7;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <a href="{% url 'index' %}">🏠 Dashboard</a>
+    <a href="#">📦 Productos</a>
+    <a href="#">🏬 Sucursales</a>
+    <a href="#">🔄 Movimientos</a>
+    <a href="#">📊 Reportes</a>
+    <a href="{% url 'descargar_backup' %}">🧾 Descargar Backup</a>
+    <a href="{% url 'enviar_paquetes' %}">🗺️ Enviar Paquetes</a>
+  </div>
+
+  <div class="main-content">
+    <h2>Selecciona ubicación y paquetes</h2>
+
+    <form method="post" action="{% url 'enviar_paquetes' %}">
+      {% csrf_token %}
+      <div id="map"></div>
+      <input type="hidden" name="destino" id="destino">
+
+      <h3>Paquetes</h3>
+      <label><input type="checkbox" name="paquetes[]" value="Pack1"> Pack1</label>
+      <label><input type="checkbox" name="paquetes[]" value="Pack2"> Pack2</label>
+      <label><input type="checkbox" name="paquetes[]" value="Pack3"> Pack3</label>
+
+      <button type="submit">Enviar</button>
+    </form>
+  </div>
+
+  <script>
+    const map = L.map('map').setView([13.7, -89.1], 8); // El Salvador
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    let marker;
+    map.on('click', function(e) {
+      if (marker) map.removeLayer(marker);
+      marker = L.marker(e.latlng).addTo(map);
+      document.getElementById("destino").value = e.latlng.lat + "," + e.latlng.lng;
+    });
+  </script>
+
+</body>
+</html>
