@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'sky_rent.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'django',
+        'NAME': 'mel69$inventario',
         'USER': 'mel69',
         'PASSWORD': 'mariadb123',
         'HOST': 'mel69.mysql.pythonanywhere-services.com',
