@@ -158,8 +158,14 @@ def resumen_inventario(request):
         'sucursales': list(sucursales)
     })
 
+import logging
+logger = logging.getLogger(__name__)
+def auth_view(request):
+    if request.method == 'POST':
+        logger.warning(f"POST recibido: {request.POST}")
 
-@csrf_exempt
+
+
 def auth_view(request):
     if request.method == 'POST':
         action = request.POST.get('action')
