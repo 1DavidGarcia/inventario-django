@@ -4,10 +4,12 @@
   <meta charset="UTF-8">
   <title>Sky Rent - Inventario</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       background-color: #121212;
       color: #fff;
       display: flex;
@@ -30,6 +32,7 @@
       color: #00bcd4;
       text-decoration: none;
       font-weight: bold;
+      transition: background 0.3s;
     }
 
     .sidebar a:hover {
@@ -52,6 +55,7 @@
     section {
       margin-bottom: 40px;
       text-align: center;
+      transition: background 0.5s;
     }
 
     button {
@@ -62,10 +66,18 @@
       border: none;
       cursor: pointer;
       font-weight: bold;
+      transition: transform 0.2s, background 0.3s;
     }
 
     button:hover {
       background-color: #0097a7;
+      transform: scale(1.05);
+    }
+
+    #graficoSucursal {
+      max-width: 300px;
+      max-height: 300px;
+      margin: 0 auto;
     }
 
     .bot-container {
@@ -86,14 +98,30 @@
       left: 220px;
       right: 0;
     }
+
+    #bienvenida {
+      display: none;
+      background-color: #00bcd4;
+      color: #121212;
+      padding: 15px;
+      font-weight: bold;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
 
   <div class="sidebar">
     <a href="{% url 'index' %}">🏠 Dashboard</a>
-    <a href="#">📦 Productos</a>
-    <a href="#">🏬 Sucursales</a>
+    <a href="{% url 'inventario_crud' %}">📦 Inventario CRUD</a>
+    <a href="{% url 'sucursales' %}">🏬 Sucursales</a>
     <a href="#">🔄 Movimientos</a>
     <a href="#">📊 Reportes</a>
     <a href="{% url 'descargar_backup' %}">🧾 Descargar Backup</a>
@@ -105,17 +133,18 @@
       <h1>Sky Rent - Panel de Inventario</h1>
     </header>
 
+    <div id="bienvenida">¡Bienvenido al panel de inventario!</div>
+
     <section id="resumen">
       <h2>Resumen General</h2>
       <p>Aquí verás el estado actual del inventario por sucursal y tipo de producto.</p>
-      <!-- Aquí puedes insertar tablas dinámicas con Django o JS -->
     </section>
 
     <section id="acciones">
       <h2>Acciones Rápidas</h2>
-      <button>Agregar Producto</button>
-      <button>Registrar Movimiento</button>
-      <button>Exportar a Excel</button>
+      <button class="accion" data-target="#resumen">Agregar Producto</button>
+      <button class="accion" data-target="#acciones">Registrar Movimiento</button>
+      <button class="accion" data-target="#backup">Exportar a Excel</button>
     </section>
 
     <section id="backup">
@@ -127,7 +156,6 @@
   </div>
 
   <div class="bot-container">
-    <!-- Chatbot de Dialogflow -->
     <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
     <df-messenger
       intent="WELCOME"
@@ -142,8 +170,88 @@
   </div>
 
   <footer>
-    &copy; 2025 Sky Rent a Car - Sistema de Inventario
+    &copy; 2025 Sky Lend a Car - Sistema de Inventario
   </footer>
+
+  <script>
+    $(document).ready(function() {
+      $('#bienvenida').fadeIn(1000);
+
+      $('.accion').click(function() {
+        const target = $(this).data('target');
+        $(target).css('background-color', '#1f1f1f').fadeOut(100).fadeIn(300);
+        alert('Acción ejecutada: ' + $(this).text());
+      });
+
+      $.ajax({
+        url: '/api/resumen-inventario/',
+        method: 'GET',
+        success: function(data) {
+          let html = `
+            <h2>Resumen General</h2>
+            <p><strong>Total productos:</strong> ${data.total_productos}</p>
+            <p><strong>Sucursal con más stock:</strong> ${data.top_sucursal}</p>
+            <table style="margin: 0 auto; border-collapse: collapse;">
+              <tr><th>Sucursal</th><th>Total</th></tr>
+          `;
+
+          const labels = [];
+          const values = [];
+
+          data.sucursales.forEach(s => {
+            html += `<tr><td>${s.sucursal}</td><td>${s.total}</td></tr>`;
+            labels.push(s.sucursal);
+            values.push(s.total);
+          });
+
+          html += `</table>
+            <h3 style="margin-top: 30px;">📊 Distribución por Sucursal</h3>
+            <canvas id="graficoSucursal" width="400" height="400"></canvas>
+          `;
+
+          $('#resumen').html(html);
+
+          const ctx = document.getElementById('graficoSucursal').getContext('2d');
+          new Chart(ctx, {
+            type: 'pie',
+            data: {
+              labels: labels,
+              datasets: [{
+                label: 'Inventario por Sucursal',
+                data: values,
+                backgroundColor: [
+                  '#00bcd4', '#0097a7', '#4caf50', '#ff9800',
+                  '#e91e63', '#9c27b0', '#3f51b5', '#795548',
+                  '#607d8b', '#f44336', '#8bc34a', '#ffc107',
+                  '#2196f3', '#673ab7'
+                ],
+                borderColor: '#121212',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  labels: {
+                    color: '#fff'
+                  }
+                }
+              }
+            }
+          });
+        },
+        error: function() {
+          $('#resumen').append('<p style="color:red;">Error al cargar el resumen.</p>');
+        }
+      });
+    });
+  </script>
+
+  <form method="POST" action="/logout/">
+    {% csrf_token %}
+    <button type="submit">Cerrar sesión</button>
+  </form>
 
 </body>
 </html>

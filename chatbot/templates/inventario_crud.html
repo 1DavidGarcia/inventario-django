@@ -1,0 +1,559 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Sky Rent - Inventario CRUD</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 100%);
+      color: #fff;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 220px;
+      background-color: #1f1f1f;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding-top: 20px;
+      border-right: 1px solid #333;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 12px 20px;
+      color: #00bcd4;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .sidebar a:hover {
+      background-color: #333;
+    }
+
+    .main-content {
+      margin-left: 220px;
+      padding: 40px;
+      flex-grow: 1;
+      max-width: 1600px;
+    }
+
+    .header {
+      margin-bottom: 40px;
+      animation: fadeInDown 0.6s ease;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(135deg, #00bcd4 0%, #00e5ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .header p {
+      color: #888;
+      font-size: 1.1rem;
+    }
+
+    .form-card {
+      background: rgba(31, 31, 31, 0.6);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      border: 1px solid rgba(0, 188, 212, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      margin-bottom: 30px;
+      animation: fadeInUp 0.6s ease;
+    }
+
+    .form-card h3 {
+      color: #00bcd4;
+      margin-bottom: 25px;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-card h3::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: linear-gradient(180deg, #00bcd4 0%, #00e5ff 100%);
+      border-radius: 2px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 15px;
+      align-items: end;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group label {
+      color: #00bcd4;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      padding: 12px 15px;
+      background: rgba(15, 15, 15, 0.8);
+      color: #fff;
+      border: 2px solid rgba(0, 188, 212, 0.3);
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      outline: none;
+      border-color: #00bcd4;
+      box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
+      background-color: rgba(0, 188, 212, 0.05);
+    }
+
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300bcd4' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 35px;
+    }
+
+    select option {
+      background-color: #1a1a1a;
+      padding: 10px;
+    }
+
+    button {
+      padding: 12px 25px;
+      background: linear-gradient(135deg, #00bcd4 0%, #00e5ff 100%);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 188, 212, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 188, 212, 0.5);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .table-container {
+      background: rgba(31, 31, 31, 0.6);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      border: 1px solid rgba(0, 188, 212, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      overflow-x: auto;
+      animation: fadeInUp 0.8s ease;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 20px;
+    }
+
+    th {
+      background: linear-gradient(135deg, rgba(0, 188, 212, 0.2) 0%, rgba(0, 229, 255, 0.1) 100%);
+      padding: 18px 15px;
+      text-align: center;
+      font-weight: 700;
+      color: #00e5ff;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      border-bottom: 2px solid rgba(0, 188, 212, 0.3);
+    }
+
+    th:first-child {
+      border-radius: 12px 0 0 0;
+    }
+
+    th:last-child {
+      border-radius: 0 12px 0 0;
+    }
+
+    td {
+      padding: 15px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(15, 15, 15, 0.3);
+    }
+
+    tr {
+      transition: all 0.3s ease;
+    }
+
+    tr:hover td {
+      background: rgba(0, 188, 212, 0.08);
+    }
+
+    tr:last-child td:first-child {
+      border-radius: 0 0 0 12px;
+    }
+
+    tr:last-child td:last-child {
+      border-radius: 0 0 12px 0;
+    }
+
+    td input[type="text"],
+    td input[type="number"],
+    td select {
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      width: 100%;
+      min-width: 120px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .action-buttons button {
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      min-width: 80px;
+    }
+
+    .btn-editar {
+      background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);
+    }
+
+    .btn-editar:hover {
+      box-shadow: 0 6px 20px rgba(255, 167, 38, 0.5);
+    }
+
+    .btn-eliminar {
+      background: linear-gradient(135deg, #ef5350 0%, #e53935 100%);
+    }
+
+    .btn-eliminar:hover {
+      box-shadow: 0 6px 20px rgba(239, 83, 80, 0.5);
+    }
+
+    .stats-bar {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+      animation: fadeInUp 0.7s ease;
+    }
+
+    .stat-card {
+      background: rgba(31, 31, 31, 0.6);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 20px;
+      border: 1px solid rgba(0, 188, 212, 0.2);
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(0, 188, 212, 0.5);
+      box-shadow: 0 8px 25px rgba(0, 188, 212, 0.2);
+    }
+
+    .header span {
+       display: inline-block; /* permite dar dimensiones */
+       width: 60px;
+       height: 60px;
+       font-size: 40px; /* tamaño del emoji */
+       text-align: center; /* centra horizontalmente */
+       line-height: 60px; /* centra verticalmente */
+       background: #000000; /* ejemplo de fondo */
+       border-radius: 10px; /* opcional, esquinas redondeadas */
+      }
+
+    .stat-icon {
+      font-size: 2.5rem;
+    }
+
+    .stat-info h4 {
+      color: #888;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+
+    .stat-info p {
+      color: #00e5ff;
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .bot-container {
+      position: fixed;
+      bottom: 0;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .form-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .form-grid button {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        margin-left: 0;
+        padding: 20px;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-bar {
+        flex-direction: column;
+      }
+
+      .table-container {
+        padding: 15px;
+      }
+
+      table {
+        font-size: 0.85rem;
+      }
+
+      th, td {
+        padding: 10px 8px;
+      }
+
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <a href="{% url 'index' %}">🏠 Dashboard</a>
+    <a href="{% url 'inventario_crud' %}">📦 Inventario CRUD</a>
+    <a href="{% url 'sucursales' %}">🏬 Sucursales</a>
+    <a href="#">🔄 Movimientos</a>
+    <a href="#">📊 Reportes</a>
+    <a href="{% url 'descargar_backup' %}">🧾 Descargar Backup</a>
+    <a href="{% url 'enviar_paquetes' %}">🗺️ Enviar Paquetes</a>
+  </div>
+
+  <div class="main-content">
+    <div class="header">
+      <span>📦</span>
+      <h1>Gestión de Inventario</h1>
+      <p>Administra los productos de todas las sucursales</p>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-info">
+          <h4>Total de Productos</h4>
+          <p>{{ registros|length }}</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🏬</div>
+        <div class="stat-info">
+          <h4>Departamentos</h4>
+          <p>14</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✨</div>
+        <div class="stat-info">
+          <h4>Estado</h4>
+          <p style="font-size: 1.3rem;">Activo</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h3>➕ Agregar Nuevo Producto</h3>
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="producto">Producto</label>
+            <input type="text" id="producto" name="producto" placeholder="Nombre del producto" required>
+          </div>
+          <div class="form-group">
+            <label for="sucursal">Departamento</label>
+            <select id="sucursal" name="sucursal" required>
+              <option value="">Selecciona un departamento</option>
+              <option value="Ahuachapán">Ahuachapán</option>
+              <option value="Santa Ana">Santa Ana</option>
+              <option value="Sonsonate">Sonsonate</option>
+              <option value="La Libertad">La Libertad</option>
+              <option value="Chalatenango">Chalatenango</option>
+              <option value="San Salvador">San Salvador</option>
+              <option value="Cuscatlán">Cuscatlán</option>
+              <option value="La Paz">La Paz</option>
+              <option value="Cabañas">Cabañas</option>
+              <option value="San Vicente">San Vicente</option>
+              <option value="Usulután">Usulután</option>
+              <option value="San Miguel">San Miguel</option>
+              <option value="Morazán">Morazán</option>
+              <option value="La Unión">La Unión</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="cantidad">Cantidad</label>
+            <input type="number" id="cantidad" step="0.01" name="cantidad" placeholder="0.00" required>
+          </div>
+          <button type="submit" name="agregar">Agregar</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="table-container">
+      <h3 style="color: #00bcd4; margin-bottom: 15px; font-size: 1.4rem;">
+        📋 Listado de Productos
+      </h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Departamento</th>
+            <th>Cantidad</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in registros %}
+          <tr>
+            <form method="post">
+              {% csrf_token %}
+              <td><input type="text" name="producto" value="{{ r.producto }}"></td>
+              <td>
+                <select name="sucursal" required>
+                  <option value="{{ r.sucursal }}">{{ r.sucursal }}</option>
+                  <option value="Ahuachapán">Ahuachapán</option>
+                  <option value="Santa Ana">Santa Ana</option>
+                  <option value="Sonsonate">Sonsonate</option>
+                  <option value="La Libertad">La Libertad</option>
+                  <option value="Chalatenango">Chalatenango</option>
+                  <option value="San Salvador">San Salvador</option>
+                  <option value="Cuscatlán">Cuscatlán</option>
+                  <option value="La Paz">La Paz</option>
+                  <option value="Cabañas">Cabañas</option>
+                  <option value="San Vicente">San Vicente</option>
+                  <option value="Usulután">Usulután</option>
+                  <option value="San Miguel">San Miguel</option>
+                  <option value="Morazán">Morazán</option>
+                  <option value="La Unión">La Unión</option>
+                </select>
+              </td>
+              <td><input type="number" step="0.01" name="cantidad" value="{{ r.cantidad }}"></td>
+              <td>
+                <input type="hidden" name="id" value="{{ r.id }}">
+                <div class="action-buttons">
+                  <button type="submit" name="editar" class="btn-editar">✏️ Editar</button>
+                  <button type="submit" name="eliminar" class="btn-eliminar" onclick="return confirm('¿Estás seguro de eliminar este producto?')">🗑️ Eliminar</button>
+                </div>
+              </td>
+            </form>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bot-container">
+    <!-- Chatbot de Dialogflow -->
+    <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+    <df-messenger
+      intent="WELCOME"
+      chat-title="Asistente Virtual"
+      agent-id="e9cd8eb2-97a8-4fee-8811-d26b411ab1a1"
+      language-code="es"
+      chat-icon="https://cdn-icons-png.flaticon.com/512/4712/4712035.png"
+      user-id="cliente_actual"
+      wait-open
+      theme="dark">
+    </df-messenger>
+  </div>
+
+</body>
+</html>

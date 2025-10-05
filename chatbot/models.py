@@ -56,3 +56,35 @@ class Sucursal(models.Model):
     class Meta:
         managed = False
         db_table = 'sucursal'
+
+
+class InventarioCRUD(models.Model):
+    producto = models.CharField(max_length=100)
+    sucursal = models.CharField(max_length=100)
+    cantidad = models.FloatField()
+    fecha_ingreso = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.producto} - {self.sucursal} ({self.cantidad})"
+
+
+class EnviosEnCurso(models.Model):
+    producto = models.CharField(max_length=100)
+    sucursal = models.CharField(max_length=100)
+    cantidad = models.FloatField()
+    destino = models.CharField(max_length=100)
+    fecha_envio = models.DateTimeField(auto_now_add=True)
+    codigo_confirmacion = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.producto} → {self.destino}"
+
+
+class Usuario(models.Model):
+    username = models.CharField(max_length=100, unique=True)
+    password = models.CharField(max_length=100)
+    nombre = models.CharField(max_length=100)
+    correo = models.EmailField(blank=True, null=True)
+
+    def __str__(self):
+        return self.username

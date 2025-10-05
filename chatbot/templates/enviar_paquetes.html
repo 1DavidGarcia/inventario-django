@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,12 +8,18 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <style>
-    body {
+    * {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #121212;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 100%);
       color: #fff;
       display: flex;
+      min-height: 100vh;
     }
 
     .sidebar {
@@ -40,43 +47,275 @@
 
     .main-content {
       margin-left: 220px;
-      padding: 20px;
+      padding: 40px;
       flex-grow: 1;
+      max-width: 1400px;
     }
 
-    h2 {
+    .header {
       text-align: center;
+      margin-bottom: 40px;
+      animation: fadeInDown 0.6s ease;
+    }
+
+    .header h2 {
+      font-size: 2.5rem;
+      background: linear-gradient(135deg, #a83b08 0%, #9b7a1e 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .header span {
+     display: inline-block; /* permite dar dimensiones */
+     width: 60px;
+     height: 60px;
+     font-size: 40px; /* tamaño del emoji */
+     text-align: center; /* centra horizontalmente */
+     line-height: 60px; /* centra verticalmente */
+     background: #000000; /* ejemplo de fondo */
+     border-radius: 10px; /* opcional, esquinas redondeadas */
+     }
+
+    .header p {
+      color: #888;
+      font-size: 1.1rem;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
       margin-bottom: 30px;
     }
 
-    #map {
-      height: 400px;
-      width: 100%;
+    .card {
+      background: rgba(31, 31, 31, 0.6);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      border: 1px solid rgba(0, 188, 212, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      animation: fadeInUp 0.6s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(0, 188, 212, 0.5);
+      box-shadow: 0 12px 48px rgba(0, 188, 212, 0.2);
+    }
+
+    .card h3 {
+      color: #00bcd4;
       margin-bottom: 20px;
-      border: 2px solid #00bcd4;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    form {
-      text-align: center;
+    .card h3::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: linear-gradient(180deg, #00bcd4 0%, #00e5ff 100%);
+      border-radius: 2px;
     }
 
-    label {
+    #map {
+      height: 450px;
+      width: 100%;
+      border-radius: 15px;
+      border: 2px solid rgba(0, 188, 212, 0.3);
+      box-shadow: 0 4px 20px rgba(0, 188, 212, 0.1);
+      overflow: hidden;
+    }
+
+    .map-container {
+      grid-column: 1 / -1;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
       display: block;
-      margin: 10px 0;
+      margin-bottom: 10px;
+      color: #00bcd4;
+      font-weight: 600;
+      font-size: 1rem;
     }
 
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #00bcd4;
+    select {
+      width: 100%;
+      padding: 15px;
+      background: rgba(15, 15, 15, 0.8);
+      color: #fff;
+      border: 2px solid rgba(0, 188, 212, 0.3);
+      border-radius: 12px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300bcd4' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 15px center;
+      padding-right: 40px;
+    }
+
+    select:hover {
+      border-color: rgba(0, 188, 212, 0.6);
+      background-color: rgba(0, 188, 212, 0.05);
+    }
+
+    select:focus {
+      outline: none;
+      border-color: #00bcd4;
+      box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
+    }
+
+    select option {
+      background-color: #1a1a1a;
+      padding: 10px;
+    }
+
+    .info-badge {
+      display: inline-block;
+      background: rgba(0, 188, 212, 0.1);
+      color: #00bcd4;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      margin-top: 10px;
+      border: 1px solid rgba(0, 188, 212, 0.3);
+    }
+
+    .instructions {
+      background: rgba(0, 188, 212, 0.05);
+      border-left: 4px solid #00bcd4;
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      color: #ccc;
+      font-size: 0.95rem;
+    }
+
+    .btn-enviar {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #00bcd4 0%, #00e5ff 100%);
       color: #fff;
       border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
       cursor: pointer;
-      font-weight: bold;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 15px rgba(0, 188, 212, 0.3);
+      position: relative;
+      overflow: hidden;
     }
 
-    button:hover {
-      background-color: #0097a7;
+    .btn-enviar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-enviar:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(0, 188, 212, 0.5);
+    }
+
+    .btn-enviar:hover::before {
+      left: 100%;
+    }
+
+    .btn-enviar:active {
+      transform: translateY(0);
+    }
+
+    .btn-enviar:disabled {
+      background: #555;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .marker-info {
+      display: none;
+      background: rgba(0, 188, 212, 0.1);
+      border: 1px solid rgba(0, 188, 212, 0.3);
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      animation: fadeInUp 0.3s ease;
+    }
+
+    .marker-info.active {
+      display: block;
+    }
+
+    .marker-info span {
+      color: #00e5ff;
+      font-weight: 600;
+    }
+
+    @media (max-width: 1024px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        margin-left: 0;
+        padding: 20px;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .header h2 {
+        font-size: 2rem;
+      }
+
+      #map {
+        height: 350px;
+      }
     }
   </style>
 </head>
@@ -84,8 +323,8 @@
 
   <div class="sidebar">
     <a href="{% url 'index' %}">🏠 Dashboard</a>
-    <a href="#">📦 Productos</a>
-    <a href="#">🏬 Sucursales</a>
+    <a href="{% url 'inventario_crud' %}">📦 Inventario CRUD</a>
+    <a href="{% url 'sucursales' %}">🏬 Sucursales</a>
     <a href="#">🔄 Movimientos</a>
     <a href="#">📊 Reportes</a>
     <a href="{% url 'descargar_backup' %}">🧾 Descargar Backup</a>
@@ -93,34 +332,131 @@
   </div>
 
   <div class="main-content">
-    <h2>Selecciona ubicación y paquetes</h2>
+    <div class="header">
+      <span>📦</span>
+      <h2>Envío de Paquetes</h2>
+      <p>Selecciona la ubicación de destino y el paquete a enviar</p>
+    </div>
 
-    <form method="post" action="{% url 'enviar_paquetes' %}">
+    <form id="form-envio">
       {% csrf_token %}
-      <div id="map"></div>
       <input type="hidden" name="destino" id="destino">
 
-      <h3>Paquetes</h3>
-      <label><input type="checkbox" name="paquetes[]" value="Pack1"> Pack1</label>
-      <label><input type="checkbox" name="paquetes[]" value="Pack2"> Pack2</label>
-      <label><input type="checkbox" name="paquetes[]" value="Pack3"> Pack3</label>
+      <div class="card map-container">
+        <h3>📍 Ubicación de Destino</h3>
+        <div class="instructions">
+          💡 Haz clic en el mapa para seleccionar la ubicación de destino del paquete
+        </div>
+        <div id="map"></div>
+        <div class="marker-info" id="marker-info">
+          📌 Ubicación seleccionada: <span id="coords-display"></span>
+        </div>
+      </div>
 
-      <button type="submit">Enviar</button>
+      <div class="content-grid">
+        <div class="card">
+          <h3>📦 Selección de Paquete</h3>
+          <div class="form-group">
+            <label for="paquete-select">Paquete a enviar</label>
+            <select name="paquete" id="paquete-select" required>
+              <option value="" disabled selected>-- Selecciona un paquete --</option>
+              {% for p in paquetes %}
+                <option value="{{ p.id }}">
+                  #{{ p.id }} - {{ p.producto }} ({{ p.sucursal }}) - {{ p.cantidad }} unidades
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="info-badge">
+            📊 {{ paquetes|length }} paquete(s) disponible(s)
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>🚀 Confirmar Envío</h3>
+          <div class="instructions">
+            Verifica que hayas seleccionado:
+            <br>✓ Ubicación en el mapa
+            <br>✓ Paquete a enviar
+          </div>
+          <button type="button" class="btn-enviar" onclick="enviarPaquete()">
+            🚁 Enviar Paquete
+          </button>
+        </div>
+      </div>
     </form>
   </div>
 
   <script>
-    const map = L.map('map').setView([13.7, -89.1], 8); // El Salvador
+    const map = L.map('map').setView([13.7, -89.1], 8);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
     let marker;
+    const markerInfo = document.getElementById('marker-info');
+    const coordsDisplay = document.getElementById('coords-display');
+
     map.on('click', function(e) {
       if (marker) map.removeLayer(marker);
-      marker = L.marker(e.latlng).addTo(map);
+      
+      marker = L.marker(e.latlng, {
+        icon: L.divIcon({
+          className: 'custom-marker',
+          html: '📍',
+          iconSize: [30, 30]
+        })
+      }).addTo(map);
+      
+      const lat = e.latlng.lat.toFixed(4);
+      const lng = e.latlng.lng.toFixed(4);
+      
       document.getElementById("destino").value = e.latlng.lat + "," + e.latlng.lng;
+      coordsDisplay.textContent = `${lat}, ${lng}`;
+      markerInfo.classList.add('active');
     });
+
+    function enviarPaquete() {
+      const destino = document.getElementById("destino").value;
+      const paquete = document.querySelector("select[name='paquete']").value;
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      const btnEnviar = event.target;
+
+      if (!destino || !paquete) {
+        alert("⚠️ Por favor selecciona una ubicación en el mapa y un paquete.");
+        return;
+      }
+
+      btnEnviar.disabled = true;
+      btnEnviar.textContent = '📡 Enviando...';
+
+      const formData = new FormData();
+      formData.append("destino", destino);
+      formData.append("paquete", paquete);
+      formData.append("csrfmiddlewaretoken", csrfToken);
+
+      fetch("{% url 'enviar_paquetes' %}", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          alert("❌ Error: " + data.error);
+          btnEnviar.disabled = false;
+          btnEnviar.textContent = '🚁 Enviar Paquete';
+        } else {
+          alert("✅ Envío confirmado exitosamente\nCódigo: " + data.codigo_confirmacion);
+          location.reload();
+        }
+      })
+      .catch(err => {
+        console.error("Error al enviar:", err);
+        alert("❌ Hubo un problema al enviar el paquete. Por favor intenta de nuevo.");
+        btnEnviar.disabled = false;
+        btnEnviar.textContent = '🚁 Enviar Paquete';
+      });
+    }
   </script>
 
 </body>
