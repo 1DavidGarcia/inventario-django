@@ -81,7 +81,7 @@ DATABASES = {
         'NAME': 'django',
         'USER': 'root',
         'PASSWORD': 'mariadb',
-        'HOST': 'localhost',
+        'HOST': 'mel69.mysql.pythonanywhere-services.com',
         'PORT': '3306',
     }
 }
