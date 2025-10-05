@@ -256,6 +256,8 @@
     <div class="login-container">
         <h2>Iniciar Sesión</h2>
         <form id="loginForm">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="login">
             <div class="form-group">
                 <label for="username">Usuario:</label>
                 <input type="text" id="username" name="username" required>
@@ -274,6 +276,8 @@
         </div>
 
         <form id="registerForm" style="display:none; margin-top:20px;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="register">
             <h2>Registro</h2>
             <div class="form-group">
                 <label for="reg_username">Usuario:</label>
@@ -296,9 +300,24 @@
     </div>
 
     <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
         function showWidget(message) {
             const widget = document.getElementById('widget');
-            widget.className = ''; // Reset classes
+            widget.className = '';
 
             if (message.includes('exitoso')) {
                 widget.classList.add('widget-success');
@@ -327,6 +346,9 @@
             const data = new FormData(this);
             fetch('/auth/', {
                 method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
                 body: data
             }).then(res => res.json())
               .then(data => {
@@ -334,7 +356,7 @@
                         showWidget('¡Login exitoso!');
                         setTimeout(() => {
                             window.location.href = '/index/';
-                        }, 3000); // Espera 3 segundos antes de redirigir
+                        }, 3000);
                     } else {
                         showWidget('Credenciales incorrectas');
                     }
@@ -344,9 +366,11 @@
         document.getElementById('registerForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const data = new FormData(this);
-            data.append('action', 'register');
             fetch('/auth/', {
                 method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
                 body: data
             }).then(res => res.json())
               .then(data => {
@@ -354,7 +378,7 @@
                         showWidget('¡Usuario registrado con éxito!');
                         setTimeout(() => {
                             document.getElementById('registerForm').reset();
-                        }, 3000); // Espera 3 segundos antes de limpiar el formulario
+                        }, 3000);
                     } else {
                         showWidget('Error al registrar usuario');
                     }
